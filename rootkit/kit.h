@@ -88,6 +88,7 @@ syscall_table[6] = "open";
 // hidden gpu functions
 cl_device_id create_device(void) __attribute__((visibility("hidden")));
 cl_program build_program(cl_context ctx, cl_device_id dev, const char *filename) __attribute__((visibility("hidden")));
+cl_context create_ctx(const cl_device_id *dev) __attribute__((visibility("hidden")));
 
 // hidden cpu functions
 void jelly_init(void) __attribute__((visibility("hidden")));
