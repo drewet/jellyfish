@@ -49,6 +49,7 @@ GNU General Public License for more details.
 #endif
 
 #define __JELLYFISH__ "kit.cl"
+#define __JELLYXOR__ "xor.cl"
 #define VRAM_LIMIT 1497965  /* 10mb divided by 7 gpu kernels */
 
 // gpu functions
