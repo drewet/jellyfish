@@ -25,16 +25,18 @@ struct jellyfish{
     cl_platform_id platform;
     cl_command_queue cq;
     cl_program program;
-    cl_kernel kernels[7];
+    cl_kernel kernels[8];
 };
 
 typedef struct jellyfish *jelly;
 
 // globals
-char *buffer, *bufffer2;
-cl_mem log, output;
+char *buffer, *buffer2, *buffer3;
+cl_mem log, output, input, local, group;
 cl_int err;
 size_t global_size = 2;
 size_t local_size = 0;
+size_t global_xor_size = 4;
+size_t local_xor_size = 2;
 
 #endif
