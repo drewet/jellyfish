@@ -15,7 +15,6 @@ Requirements for use:
 - Change line 103 in rootkit/kit.c to server ip you want to monitor gpu client from
 
 Stay tuned for more features:
-- xor.cl
 - client listener; let buffers stay stored in gpu until you send magic packet from server
 
 Disclaimer:
