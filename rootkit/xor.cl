@@ -10,7 +10,7 @@ typedef unsigned char uchar
 __kernel void jelly_xor(__global uchar *input, __local uchar *local_result
 			__global uchar *group_result){
     int i;
-    uchar string;
+    uchar **string;
 
     if(l_id == 0){
         for(i = 0; i < l_size; i++){
