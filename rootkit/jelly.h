@@ -31,7 +31,7 @@ struct jellyfish{
 typedef struct jellyfish *jelly;
 
 // globals
-char *buffer, *buffer2, *buffer3;
+char **buffer, **buffer2, **buffer3;
 cl_mem log, output, input, local, group;
 cl_int err;
 size_t global_size = 2;
