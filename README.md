@@ -7,7 +7,7 @@ Advantages of gpu stored memory:
 - Can snoop on cpu host memory via DMA
 - Gpu can be used for fast/swift mathematical calculations like xor'ing or parsing
 - Stubs
-- Malicious memory is still inside gpu after shutdown
+- Malicious memory may be retained across warm reboots. (Did more conductive research on the theory of malicious memory still being in gpu after shutdown)
 
 Requirements for use:
 - Have OpenCL drivers/icds installed
