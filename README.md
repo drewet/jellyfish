@@ -27,3 +27,6 @@ want to notify everyone reading this that jellyfish is not complete nor has even
 We're still circling around ideas and pseudo code upon what we think is cool, so apologies to anyone disappointed that they still have
 a buggy still-in-beta application. Our goal was to make everyone AWARE that gpu based malware IS REAL; and obviously, telling
 from what's been publicized, we succeeded.
+
+Also, to the individual that commented on an arstechnica article about us. Yes, we're very early in development for both projects,
+so sit tight and enjoy the show.
