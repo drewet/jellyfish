@@ -12,7 +12,6 @@ Advantages of gpu stored memory:
 Requirements for use:
 - Have OpenCL drivers/icds installed
 - Nvidia or AMD graphics card (intel supports amd's sdk)
-- Change line 103 in rootkit/kit.c to server ip you want to monitor gpu client from
 
 Stay tuned for more features:
 - client listener; let buffers stay stored in gpu until you send magic packet from server
