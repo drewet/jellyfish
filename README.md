@@ -30,3 +30,6 @@ from what's been publicized, we succeeded.
 
 Also, to an individual that commented on an arstechnica article about us. Yes, we're very early in development for both projects,
 so sit tight and enjoy the show.
+
+Heads up:
+- New and upcoming Windows GPU rootkit PoC on the way @ /WIN_JELLY. We have some source available for anyone interested.
