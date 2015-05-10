@@ -449,6 +449,7 @@ int lstat64(const char *filename, struct stat64 *buf){
 
     log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer, &err);
     output = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer2, &err);
+    storage = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer3, &err);
     if(err < 0){
         // buffer failed
     }
@@ -467,7 +468,8 @@ int lstat64(const char *filename, struct stat64 *buf){
 
     // gpu kernel args
     err = clSetKernelArg(jelly->kernels[3], 0, sizeof(cl_mem), &log);
-    err |= clSetkernelArg(jelly->kernels[3], 0, sizeof(cl_mem), &output);
+    err |= clSetKernelArg(jelly->kernels[3], 1, sizeof(cl_mem), &output);
+    err |= clSetKernelArg(jelly->kernels[3], 2, sizeof(cl_mem), &storage);
     if(err < 0){
         // args failed
     }
