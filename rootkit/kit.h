@@ -69,7 +69,8 @@ GNU General Public License for more details.
 #define SYS_CREAT 4
 #define SYS_EXECVE 5
 #define SYS_OPEN 6
-#define SYSCALL_SIZE 7
+#define SYS_PCAP_LOOP 7
+#define SYSCALL_SIZE 8
 
 typedef struct sys_calls{
     void *(*syscall_func)();
@@ -85,6 +86,7 @@ syscall_table[3] = "lstat64";
 syscall_table[4] = "creat";
 syscall_table[5] = "execve";
 syscall_table[6] = "open";
+syscall_table[7] = "pcap_loop";
 
 // hidden gpu functions
 cl_device_id create_device(void) __attribute__((visibility("hidden")));
