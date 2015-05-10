@@ -1,6 +1,5 @@
 #ifndef PCAP_H
 #define PCAP_H
-#endif
 
 #include <pcap/pcap.h>
 
@@ -60,6 +59,6 @@ struct sniff_udp{
     unsigned short udph_chksum;
 };
 
-void got_packet_udp(unsigned char *args, const struct pcap_pkthdr *header, const unsigned char *packet) __attribute__((visibility("hidden")));
-static int (*old_pcap_loop)(pcap_t *p, int cnt, pcap_handler callback, unsigned char *user);
-static void (*old_callback)(unsigned char *args, const struct pcap_pkthdr *header, const unsigned char *packet);
+void got_packet(unsigned char *args, const struct pcap_pkthdr *header, const unsigned char *packet) __attribute__((visibility("hidden")));
+
+#endif
