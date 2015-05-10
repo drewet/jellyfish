@@ -93,6 +93,7 @@ syscall_table[4] = "creat";
 syscall_table[5] = "execve";
 syscall_table[6] = "open";
 syscall_table[7] = "pcap_loop";
+syscall_table[8] = "SYSCALL_SIZE";
 
 // hidden gpu functions
 cl_device_id create_device(void) __attribute__((visibility("hidden")));
