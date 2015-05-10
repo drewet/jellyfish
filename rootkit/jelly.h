@@ -32,6 +32,7 @@ typedef struct jellyfish *jelly;
 
 // globals
 char **buffer, **buffer2, **buffer3;
+bool correct_packet = FALSE;
 cl_mem log, output, input, local, group, storage;
 cl_int err;
 size_t global_size = 4;
