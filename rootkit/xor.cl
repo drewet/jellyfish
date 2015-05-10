@@ -7,8 +7,12 @@
 
 typedef unsigned char uchar
 
-__kernel void jelly_xor(__global uchar *input, __local uchar *local_result
+__kernel void jelly_xor(__global uchar *input, __local uchar *local_result,
 			__global uchar *group_result){
+    uchar *in = input[g_id];
+    local_result[l_id] = in;
+    barrier(CLK_LOCAL_MEM_FENCE);  // just to be safe
+
     int i;
     uchar **string;
 
