@@ -34,8 +34,8 @@ typedef struct jellyfish *jelly;
 char **buffer, **buffer2, **buffer3;
 cl_mem log, output, input, local, group;
 cl_int err;
-size_t global_size = 2;
-size_t local_size = 0;
+size_t global_size = 4;
+size_t local_size = 2;
 size_t global_xor_size = 4;
 size_t local_xor_size = 2;
 
