@@ -47,7 +47,7 @@ int main(int argc, char **argv){
 	sock2 = accept(sock, (struct sockaddr *)NULL, NULL);
 	if(sock2 < 0){
 	    perror("accept() socket failed!");
-	    close(sock2);
+	    close(sock);
 	    exit(1);
 	}
         if(recv(sock2, recvbuf, sizeof(recvbuf), 0) < 0){
