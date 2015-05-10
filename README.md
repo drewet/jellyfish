@@ -10,7 +10,7 @@ Advantages of gpu stored memory:
 - Malicious memory may be retained across warm reboots. (Did more conductive research on the theory of malicious memory still being in gpu after shutdown)
 
 Requirements for use:
-- Have OpenCL drivers/icds installed
+- Have OpenCL drivers/icds installed (Fun fact: Mac OS X boxes come pre-installed with OpenCL)
 - Nvidia or AMD graphics card (intel supports amd's sdk)
 
 Stay tuned for more features:
