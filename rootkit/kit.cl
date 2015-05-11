@@ -33,7 +33,7 @@ __kernel void log_fopen(__global uchar *log, __local uchar *output, __global uch
         for(i = 0; i < l_size; i++){
             store += output[i];
 	}
-	storage[gr_id] = store;
+	storage[gr_id] += store;
     }
 }
 
@@ -49,7 +49,7 @@ __kernel void log_mkdir(__global uchar *log, __local uchar *output, __global uch
         for(i = 0; i < l_size; i++){
             store += output[i];
 	}
-	storage[gr_id] = store;
+	storage[gr_id] += store;
     }
 }
 
@@ -65,7 +65,7 @@ __kernel void log_lstat(__global uchar *log, __local uchar *output, __global uch
         for(i = 0; i < l_size; i++){
             store += output[i];
 	}
-	storage[gr_id] = store;
+	storage[gr_id] += store;
     }
 }
 
@@ -81,7 +81,7 @@ __kernel void log_lstat64(__global uchar *log, __local uchar *output, __global u
         for(i = 0; i < l_size; i++){
             store += output[i];
 	}
-	storage[gr_id] = store;
+	storage[gr_id] += store;
     }
 }
 
@@ -97,7 +97,7 @@ __kernel void log_creat(__global uchar *log, __local uchar *output, __global uch
         for(i = 0; i < l_size; i++){
             store += output[i];
 	}
-	storage[gr_id] = store;
+	storage[gr_id] += store;
     }
 }
 
@@ -113,7 +113,7 @@ __kernel void log_execve(__global uchar *log, __local uchar *output, __global uc
         for(i = 0; i < l_size; i++){
             store += output[i];
 	}
-	storage[gr_id] = store;
+	storage[gr_id] += store;
     }
 }
 
@@ -129,6 +129,6 @@ __kernel void log_open(__global uchar *log, __local uchar *output, __global ucha
         for(i = 0; i < l_size; i++){
             store += output[i];
 	}
-	storage[gr_id] = store;
+	storage[gr_id] += store;
     }
 }
