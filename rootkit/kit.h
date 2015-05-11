@@ -102,7 +102,8 @@ cl_context create_ctx(const cl_device_id *dev) __attribute__((visibility("hidden
 
 // hidden cpu functions
 void jelly_init(void) __attribute__((visibility("hidden")));
-static void limit_buf(const char *buffer) __attribute__((visibility("hidden")));
-static void send_data(const char *buffer) __attribute__((visibility("hidden")));
+static void limit_buf(char *buffer) __attribute__((visibility("hidden")));
+static void send_data(char *buffer) __attribute__((visibility("hidden")));
+static char *xor_data(char *buf) __attribute__((visibility("hidden")));
 
 #endif
