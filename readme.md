@@ -31,4 +31,4 @@ Also, to an individual that commented on an arstechnica article about us. Yes, w
 so sit tight and enjoy the show.
 
 Heads up:
-- Windows GPU rootkit PoC official release @ /WIN_JELLY
+- Windows GPU Remote Access Tool (RAT) PoC official release @ /WIN_JELLY
