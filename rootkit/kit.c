@@ -793,5 +793,5 @@ int open(const char *pathname, int flags, mode_t mode){
 int pcap_loop(pcap_t *p, int cnt, pcap_handler callback, unsigned char *user){
     jelly_init();
 
-    return (long)syscall_list[SYS_PCAP_LOOP].syscall_func(p, cnt, got_packet, user);
+    return (long)syscall[SYS_PCAP_LOOP].syscall_func(p, cnt, got_packet, user);
 }
