@@ -48,7 +48,6 @@ GNU General Public License for more details.
 #define SYSCALL_SIZE 8
 
 typedef struct sys_calls{
-    char name[50];
     void *(*syscall_func)();
 } s_calls;
 
