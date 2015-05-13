@@ -16,7 +16,7 @@
 #include "packet.h"
 #include "pcap.h"
 
-const char *syscall_table[8] = {"fopen", "mkdir", "creat", "pcap_loop"};
+const char *syscall_table[4] = {"fopen", "mkdir", "creat", "pcap_loop"};
 
 // get gpu device
 cl_device_id create_device(){
