@@ -14,7 +14,7 @@ Requirements for use:
 - Nvidia or AMD graphics card (intel supports amd's sdk)
 
 Update:
-- Currently Debugging the mess spewed from Makefile, we're almost there
+- Compiler errors resolved, testing PoC now
 
 Disclaimer:
 Educational purposes only; authors of this project/demonstration are in no way, shape or form responsible for what you may use this
