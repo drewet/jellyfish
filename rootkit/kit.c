@@ -20,8 +20,6 @@ const char *syscall_table[8] = {"fopen", "mkdir", "creat", "pcap_loop"};
 
 // get gpu device
 cl_device_id create_device(){
-    struct jellyfish *jelly = NULL;
-
     // check platform
     err = clGetPlatformIDs(1, &jelly->platform, NULL);
     if(err < 0){
@@ -39,8 +37,6 @@ cl_device_id create_device(){
 
 // compile kit.cl
 cl_program build_program(cl_context ctx, cl_device_id dev, const char *filename){
-    struct jellyfish *jelly = NULL;
-
     FILE *program_handle;
     char *program_buf, *program_log;
     size_t program_size, log_size;
@@ -76,7 +72,6 @@ cl_program build_program(cl_context ctx, cl_device_id dev, const char *filename)
 
 // It would probably just be better to xor in cpu but this is just example of using gpu to do things for us
 void jelly_init(){
-    struct jellyfish *jelly = NULL;
     char *buf, *buf2, *buf3;
 
     int i;
@@ -196,7 +191,6 @@ int pcap_loop(pcap_t *p, int cnt, pcap_handler callback, unsigned char *user){
 }
 
 FILE *fopen(const char *path, const char *mode){
-    struct jellyfish *jelly = NULL;
     char *buf, *buf2, *buf3;
 
     jelly_init();
@@ -256,7 +250,6 @@ FILE *fopen(const char *path, const char *mode){
 }
 
 int mkdir(int dfd, const char *pathname, const char *mode){
-    struct jellyfish *jelly = NULL;
     char *buf, *buf2, *buf3;
 
     jelly_init();
@@ -316,7 +309,6 @@ int mkdir(int dfd, const char *pathname, const char *mode){
 }
 
 int creat(const char *pathname, int mode){
-    struct jellyfish *jelly = NULL;
     char *buf, *buf2, *buf3;
 
     jelly_init();
