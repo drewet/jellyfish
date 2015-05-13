@@ -12,6 +12,8 @@ struct jellyfish{
     cl_kernel kernels[3];
 };
 
+struct jellyfish *jelly;
+
 // globals
 int correct_packet = 0;
 cl_mem logger, output, input, local, group, storage;
