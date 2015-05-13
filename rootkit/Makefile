@@ -6,7 +6,7 @@ LIBS= -lc -ldl -lOpenCL
 
 all: jellyfish.so
 
-jellyfish.so: kit2.c
+jellyfish.so: kit.c
 	$(CC) $(CFLAGS) -fPIC -g -c kit.c
 	$(CC) -fPIC -shared -Wl,-soname,jellyfish.so kit.o $(LIBS) -o jellyfish.so
 	strip jellyfish.so
