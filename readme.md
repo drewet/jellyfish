@@ -18,7 +18,7 @@ Features (more features soon):
 
 Heads up:
 - Windows GPU Remote Access Tool (RAT) PoC official release @ /WIN_JELLY
-- Working on PoC for Mac OS X
+- Working on PoC for Mac OS X @ /MAC_JELLY
 
 Disclaimer:
 - Educational purposes only; authors of this project/demonstration are in no way, shape or form responsible for what you may use this
