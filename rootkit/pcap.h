@@ -5,6 +5,7 @@
 
 #define SNAP_LEN 1518 // default
 #define SIZE_UDP 8  // header length
+#define SIZE_ETHERNET 14
 
 // ip header
 struct sniff_ip{

@@ -1,0 +1,17 @@
+set(arch 32)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(arch 64)
+endif()
+
+if (DEFINED ENV{AMDAPPSDKROOT})
+	include_directories($ENV{AMDAPPSDKROOT}/include)
+	if (arch EQUAL 32)
+		link_directories($ENV{AMDAPPSDKROOT}/lib/x86)
+	elseif (arch EQUAL 64)
+		link_directories($ENV{AMDAPPSDKROOT}/lib/x86_64)
+	endif()
+endif()
+
+if (DEFINED ENV{CUDA})
+	include_directories($ENV{CUDA}/OpenCL/common/inc)
+endif()

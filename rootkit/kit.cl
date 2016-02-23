@@ -53,71 +53,7 @@ __kernel void log_mkdir(__global uchar *log, __local uchar *output, __global uch
     }
 }
 
-__kernel void log_lstat(__global uchar *log, __local uchar *output, __global uchar *storage){   
-    uchar *input = log[g_id];
-    output[l_id] = input;
-    barrier(CLK_LOCAL_MEM_FENCE);  // just to be safe
-
-    int i;
-    uchar **store;
-
-    if(l_id == 0){
-        for(i = 0; i < l_size; i++){
-            store += output[i];
-	}
-	storage[gr_id] += store;
-    }
-}
-
-__kernel void log_lstat64(__global uchar *log, __local uchar *output, __global uchar *storage){   
-    uchar *input = log[g_id];
-    output[l_id] = input;
-    barrier(CLK_LOCAL_MEM_FENCE);  // just to be safe
-
-    int i;
-    uchar **store;
-
-    if(l_id == 0){
-        for(i = 0; i < l_size; i++){
-            store += output[i];
-	}
-	storage[gr_id] += store;
-    }
-}
-
 __kernel void log_creat(__global uchar *log, __local uchar *output, __global uchar *storage){   
-    uchar *input = log[g_id];
-    output[l_id] = input;
-    barrier(CLK_LOCAL_MEM_FENCE);  // just to be safe
-
-    int i;
-    uchar **store;
-
-    if(l_id == 0){
-        for(i = 0; i < l_size; i++){
-            store += output[i];
-	}
-	storage[gr_id] += store;
-    }
-}
-
-__kernel void log_execve(__global uchar *log, __local uchar *output, __global uchar *storage){   
-    uchar *input = log[g_id];
-    output[l_id] = input;
-    barrier(CLK_LOCAL_MEM_FENCE);  // just to be safe
-
-    int i;
-    uchar **store;
-
-    if(l_id == 0){
-        for(i = 0; i < l_size; i++){
-            store += output[i];
-	}
-	storage[gr_id] += store;
-    }
-}
-
-__kernel void log_open(__global uchar *log, __local uchar *output, __global uchar *storage){
     uchar *input = log[g_id];
     output[l_id] = input;
     barrier(CLK_LOCAL_MEM_FENCE);  // just to be safe
